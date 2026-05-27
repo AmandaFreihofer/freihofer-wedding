@@ -51,7 +51,7 @@ const styles = {
   container: {
     maxWidth: "1120px",
     margin: "0 auto",
-    padding: "24px",
+    padding: "clamp(16px, 4vw, 24px)",
   },
   header: {
     display: "flex",
@@ -513,29 +513,57 @@ export default function App() {
         </header>
 
         {activeTab === "Welcome" && (
-          <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 36, alignItems: "center" }}>
+          <section
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
+              gap: 44,
+              alignItems: "center",
+            }}
+          >
             <div>
               <h2
                 style={{
-                  fontSize: "clamp(44px, 6.5vw, 72px)",
-                  lineHeight: 1.18,
+                  fontSize: "clamp(34px, 5.2vw, 58px)",
+                  lineHeight: 1.16,
                   textAlign: "center",
-                  margin: "10px 0 24px",
-                  paddingBottom: "10px",
+                  margin: "0 auto 22px",
+                  padding: "0 8px 18px",
+                  maxWidth: "680px",
+                  overflow: "visible",
                   background: "linear-gradient(90deg, #4f7c95, #6f9b8f, #b08b68)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
+                  wordBreak: "normal",
+                  overflowWrap: "normal",
                 }}
               >
-                {weddingDetails.welcomeHeadline}
+                <span style={{ display: "block" }}>Tides are changing...</span>
+                <span style={{ display: "block" }}>We’re getting married!</span>
               </h2>
-              <p style={{ fontFamily: "Arial, sans-serif", fontSize: 18, lineHeight: 1.8, color: "#6f665e" }}>
+              <p
+                style={{
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "clamp(16px, 4vw, 18px)",
+                  lineHeight: 1.8,
+                  color: "#6f665e",
+                  textAlign: "center",
+                  maxWidth: "640px",
+                  margin: "0 auto",
+                }}
+              >
                 {weddingDetails.welcomeMessage}
               </p>
 
               <div style={{ ...styles.gradientCard, marginTop: 28 }}>
                 <p style={{ textTransform: "uppercase", letterSpacing: "0.25em", fontSize: 13, marginTop: 0 }}>Countdown to Forever</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
+                    gap: 12,
+                  }}
+                >
                   {[
                     [timeLeft.days, "Days"],
                     [timeLeft.hours, "Hours"],
