@@ -704,33 +704,37 @@ export default function App() {
               </div>
             </div>
 
-            <SectionTitle eyebrow="Admin View" title="RSVP Tracker">
-              Add guests manually, remove guests, and update RSVP statuses.
-            </SectionTitle>
+            {isAdminUnlocked && (
+              <>
+                <SectionTitle eyebrow="Admin View" title="RSVP Tracker">
+                  Add guests manually, remove guests, and update RSVP statuses.
+                </SectionTitle>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 18 }}>
-              <div style={styles.card}><p>Accepted Guests</p><h3>{rsvpSummary.accepted}</h3></div>
-              <div style={styles.card}><p>Pending Parties</p><h3>{rsvpSummary.pending}</h3></div>
-              <div style={styles.card}><p>Declined Parties</p><h3>{rsvpSummary.declined}</h3></div>
-            </div>
-            <div style={{ ...styles.card, display: "grid", gridTemplateColumns: "1fr 100px auto", gap: 12, marginBottom: 18 }}>
-              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Guest name" style={styles.input} />
-              <input type="number" min="1" value={partySize} onChange={(e) => setPartySize(e.target.value)} style={styles.input} />
-              <button onClick={addGuest} style={styles.primaryButton}>Add Guest</button>
-            </div>
-            <div style={{ display: "grid", gap: 12 }}>
-              {guests.map((guest) => (
-                <div key={guest.id} style={{ ...styles.card, display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-                  <div><h3 style={{ margin: 0 }}>{guest.name}</h3><p>Party of {guest.party}</p></div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {["Accepted", "Pending", "Declined"].map((status) => (
-                      <button key={status} onClick={() => updateGuest(guest.id, status)} style={{ ...styles.navButton, background: guest.status === status ? "#4f7c95" : "#ece4d8", color: guest.status === status ? "white" : "#6f665e" }}>{status}</button>
-                    ))}
-                    <button onClick={() => removeGuest(guest.id)} style={{ ...styles.navButton, background: "#f8d7da", color: "#842029" }}>Remove</button>
-                  </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 18 }}>
+                  <div style={styles.card}><p>Accepted Guests</p><h3>{rsvpSummary.accepted}</h3></div>
+                  <div style={styles.card}><p>Pending Parties</p><h3>{rsvpSummary.pending}</h3></div>
+                  <div style={styles.card}><p>Declined Parties</p><h3>{rsvpSummary.declined}</h3></div>
                 </div>
-              ))}
-            </div>
+                <div style={{ ...styles.card, display: "grid", gridTemplateColumns: "1fr 100px auto", gap: 12, marginBottom: 18 }}>
+                  <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Guest name" style={styles.input} />
+                  <input type="number" min="1" value={partySize} onChange={(e) => setPartySize(e.target.value)} style={styles.input} />
+                  <button onClick={addGuest} style={styles.primaryButton}>Add Guest</button>
+                </div>
+                <div style={{ display: "grid", gap: 12 }}>
+                  {guests.map((guest) => (
+                    <div key={guest.id} style={{ ...styles.card, display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                      <div><h3 style={{ margin: 0 }}>{guest.name}</h3><p>Party of {guest.party}</p></div>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {["Accepted", "Pending", "Declined"].map((status) => (
+                          <button key={status} onClick={() => updateGuest(guest.id, status)} style={{ ...styles.navButton, background: guest.status === status ? "#4f7c95" : "#ece4d8", color: guest.status === status ? "white" : "#6f665e" }}>{status}</button>
+                        ))}
+                        <button onClick={() => removeGuest(guest.id)} style={{ ...styles.navButton, background: "#f8d7da", color: "#842029" }}>Remove</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
         )}
 
