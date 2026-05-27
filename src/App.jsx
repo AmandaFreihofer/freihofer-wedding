@@ -606,7 +606,8 @@ export default function App() {
                 alt="Engagement placeholder"
                 style={{ width: "100%", height: 560, objectFit: "cover", display: "block" }}
               />
-            <div style={{ padding: 18, background: "rgba(255,255,255,0.78)", fontFamily: "Arial, sans-serif" }}>
+            {isAdminUnlocked && (
+              <div style={{ padding: 18, background: "rgba(255,255,255,0.78)", fontFamily: "Arial, sans-serif" }}>
                 <label style={{ display: "inline-block", ...styles.primaryButton }}>
                   Choose Your Photo
                   <input type="file" accept="image/*" onChange={handleHeroPhotoUpload} style={{ display: "none" }} />
@@ -615,6 +616,7 @@ export default function App() {
                   This updates the preview photo instantly.
                 </p>
               </div>
+            )}
             </div>
           </section>
         )}
