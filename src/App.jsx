@@ -764,8 +764,17 @@ export default function App() {
               )}
 
               {registry.map((gift) => (
-                <div key={gift.id} style={{ ...styles.card, display: "grid", gap: 12 }}>
-                  <div>
+<div
+  key={gift.id}
+  style={{
+    ...styles.card,
+    display: "grid",
+    gap: 12,
+    textAlign: "center",
+    justifyItems: "center",
+  }}
+>
+                    <div>
                     <h3 style={{ marginTop: 0 }}>{gift.item}</h3>
                     {gift.store && <p style={{ color: "#6f665e", fontFamily: "Arial, sans-serif" }}>{gift.store}</p>}
                     <strong style={{ color: gift.bought ? "#5d7f6f" : "#4f7c95" }}>
@@ -773,8 +782,16 @@ export default function App() {
                     </strong>
                   </div>
 
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    {gift.link && (
+<div
+  style={{
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+                      {gift.link && (
                       <a
                         href={gift.link}
                         target="_blank"
