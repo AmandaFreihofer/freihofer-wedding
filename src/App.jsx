@@ -18,6 +18,8 @@ const initialWeddingDetails = {
   weddingDateDisplay: "April 17, 2027",
   ceremonyTimeDisplay: "4:30 PM",
   weddingDateTime: "2027-04-17T16:30:00",
+  rsvpDeadlineDisplay: "February 1, 2027",
+rsvpDeadlineDateTime: "2027-02-01T23:59:59",
   venueName: "Harbour House",
   venueAddressLine1: "1901 Jimmy Buffett Memorial Highway",
   venueAddressLine2: "Indian Harbour Beach, FL 32937",
@@ -255,6 +257,12 @@ export default function App() {
   }; 
 
   const weddingDate = useMemo(() => new Date(weddingDetails.weddingDateTime), [weddingDetails.weddingDateTime]);
+  const rsvpDeadline = useMemo(
+  () => new Date(weddingDetails.rsvpDeadlineDateTime),
+  [weddingDetails.rsvpDeadlineDateTime]
+);
+
+const isRsvpClosed = Date.now() > rsvpDeadline.getTime();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -289,14 +297,19 @@ export default function App() {
 
     alert("Wedding details saved!");
   }; 
-
-  const rsvpSummary = useMemo(() => {
-    return {
-      accepted: guests.filter((g) => g.status === "Accepted").reduce((sum, g) => sum + Number(g.party), 0),
-      pending: guests.filter((g) => g.status === "Pending").length,
-      declined: guests.filter((g) => g.status === "Declined").length,
-    };
-  }, [guests]);
+const rsvpSummary = useMemo(() => {
+  return {
+    accepted: guests
+      .filter((g) => g.status === "Accepted")
+      .reduce((sum, g) => {
+        const baseParty = Number(g.party || 0);
+        const plusOne = g.bringing_plus_one ? 1 : 0;
+        return sum + baseParty + plusOne;
+      }, 0),
+    pending: guests.filter((g) => g.status === "Pending").length,
+    declined: guests.filter((g) => g.status === "Declined").length,
+  };
+}, [guests]);
 
   const addGuest = async () => {
     if (!guestName.trim()) return;
@@ -326,21 +339,49 @@ export default function App() {
     setPartySize(1);
   };
 
-  const updateGuest = async (id, status) => {
-    const { error } = await supabase
-      .from("rsvps")
-      .update({ status })
-      .eq("id", id);
+const updateGuest = async (id, updates) => {
+  const { error } = await supabase
+    .from("rsvps")
+    .update(updates)
+    .eq("id", id);
 
-    if (error) {
-      alert("Failed to update RSVP.");
-      console.error(error);
-      return;
-    }
+  if (error) {
+    alert("Failed to update RSVP.");
+    console.error(error);
+    return;
+  }
 
-    setGuests(guests.map((guest) => (guest.id === id ? { ...guest, status } : guest)));
+  setGuests(
+    guests.map((guest) =>
+      guest.id === id ? { ...guest, ...updates } : guest
+    )
+  );
+};
+const updatePlusOne = async (guest, bringingPlusOne, plusOneName = "") => {
+  const updates = {
+    bringing_plus_one: bringingPlusOne,
+    plus_one_name: plusOneName,
   };
 
+  const { error } = await supabase
+    .from("rsvps")
+    .update(updates)
+    .eq("id", guest.id);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to update plus one.");
+    return;
+  }
+
+  setGuests(
+    guests.map((g) =>
+      g.id === guest.id
+        ? { ...g, ...updates }
+        : g
+    )
+  );
+};
   const removeGuest = async (id) => {
     const { error } = await supabase
       .from("rsvps")
@@ -644,9 +685,36 @@ export default function App() {
 
             <div style={{ ...styles.card, maxWidth: 860, margin: "0 auto 28px", display: "grid", gap: 14 }}>
               <h3 style={{ margin: 0, fontSize: 28, color: "#4f7c95", textAlign: "center" }}>Guest RSVP</h3>
-              <p style={{ margin: 0, textAlign: "center", color: "#6f665e", fontFamily: "Arial, sans-serif", lineHeight: 1.6 }}>
-                Your name and party size have already been added. Just choose your response below.
-              </p>
+              <p
+  style={{
+    margin: 0,
+    textAlign: "center",
+    color: "#6f665e",
+    fontFamily: "Arial, sans-serif",
+    lineHeight: 1.6,
+  }}
+>
+  Your name and party size have already been added. Just choose your response below.
+  <br />
+  <strong style={{ color: "#4f7c95" }}>
+    Please RSVP by {weddingDetails.rsvpDeadlineDisplay}.
+  </strong>
+</p>
+{isRsvpClosed && (
+  <div
+    style={{
+      textAlign: "center",
+      padding: 16,
+      borderRadius: 16,
+      background: "#ece4d8",
+      color: "#6f665e",
+      fontFamily: "Arial, sans-serif",
+      fontWeight: 600,
+    }}
+  >
+    RSVPs are now closed. Please contact Charles or Amanda directly.
+  </div>
+)}
 
               <div style={{ display: "grid", gap: 12, marginTop: 10 }}>
                 {guests.length === 0 && (
@@ -659,27 +727,95 @@ export default function App() {
                   <div
                     key={guest.id}
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 16,
-                      flexWrap: "wrap",
-                      border: "1px solid rgba(176,139,104,0.25)",
-                      borderRadius: 20,
-                      padding: 16,
-                      background: "rgba(255,255,255,0.62)",
-                    }}
+  display: "grid",
+  gap: 16,
+  textAlign: "center",
+  justifyItems: "center",
+  border: "1px solid rgba(176,139,104,0.25)",
+  borderRadius: 20,
+  padding: 20,
+  background: "rgba(255,255,255,0.62)",
+}}
                   >
                     <div>
                       <h4 style={{ margin: 0, fontSize: 22 }}>{guest.name}</h4>
                       <p style={{ margin: "6px 0 0", color: "#6f665e", fontFamily: "Arial, sans-serif" }}>
-                        Party of {guest.party} · Current response: {guest.status}
+                        Invited Guests: {guest.party}
+<br />
+Attending Guests:{" "}
+{guest.status === "Accepted"
+  ? Number(guest.party) + (guest.bringing_plus_one ? 1 : 0)
+  : 0}
+<br />
+Current Response: {guest.status}
+{guest.bringing_plus_one && guest.plus_one_name && (
+  <>
+    <br />
+    Plus One: {guest.plus_one_name}
+  </>
+)}
                       </p>
                     </div>
+{Number(guest.party) === 1 && (
+  <div style={{ display: "grid", gap: 10, justifyItems: "center", width: "100%", maxWidth: 320 }}>
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        fontFamily: "Arial, sans-serif",
+        color: "#6f665e"
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={guest.bringing_plus_one || false}
+        onChange={(e) =>
+          updatePlusOne(
+            guest,
+            e.target.checked,
+            guest.plus_one_name || ""
+          )
+        }
+      />
+      Bringing a Plus One
+    </label>
 
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+    {guest.bringing_plus_one && (
+      <input
+        type="text"
+        placeholder="Plus One Name"
+        value={guest.plus_one_name || ""}
+        onChange={(e) =>
+          updatePlusOne(
+            guest,
+            true,
+            e.target.value
+          )
+        }
+        style={{
+          marginTop: 8,
+          padding: 10,
+          width: "100%",
+          borderRadius: 12,
+          border: "1px solid #d8cbbf"
+        }}
+      />
+    )}
+  </div>
+)}
+                    <div
+  style={{
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 8,
+  }}
+>
                       <button
-                        onClick={() => updateGuest(guest.id, "Accepted")}
+                      disabled={isRsvpClosed}
+                      onClick={() => updateGuest(guest.id, { status: "Accepted" })}
                         style={{
                           ...styles.navButton,
                           background: guest.status === "Accepted" ? "#4f7c95" : "#ece4d8",
@@ -690,7 +826,8 @@ export default function App() {
                         Joyfully Accept
                       </button>
                       <button
-                        onClick={() => updateGuest(guest.id, "Declined")}
+                      disabled={isRsvpClosed}
+                      onClick={() => updateGuest(guest.id, { status: "Declined" })}
                         style={{
                           ...styles.navButton,
                           background: guest.status === "Declined" ? "#4f7c95" : "#ece4d8",
@@ -728,7 +865,7 @@ export default function App() {
                       <div><h3 style={{ margin: 0 }}>{guest.name}</h3><p>Party of {guest.party}</p></div>
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                         {["Accepted", "Pending", "Declined"].map((status) => (
-                          <button key={status} onClick={() => updateGuest(guest.id, status)} style={{ ...styles.navButton, background: guest.status === status ? "#4f7c95" : "#ece4d8", color: guest.status === status ? "white" : "#6f665e" }}>{status}</button>
+                          <button key={status} onClick={() => updateGuest(guest.id, { status })} style={{ ...styles.navButton, background: guest.status === status ? "#4f7c95" : "#ece4d8", color: guest.status === status ? "white" : "#6f665e" }}>{status}</button>
                         ))}
                         <button onClick={() => removeGuest(guest.id)} style={{ ...styles.navButton, background: "#f8d7da", color: "#842029" }}>Remove</button>
                       </div>
@@ -859,6 +996,8 @@ export default function App() {
                 ["weddingDateDisplay", "Wedding Date"],
                 ["ceremonyTimeDisplay", "Ceremony Time"],
                 ["weddingDateTime", "Countdown Date/Time"],
+                ["rsvpDeadlineDisplay", "RSVP Deadline"],
+["rsvpDeadlineDateTime", "RSVP Deadline Date/Time"],
                 ["venueName", "Venue Name"],
                 ["venueAddressLine1", "Venue Address Line 1"],
                 ["venueAddressLine2", "Venue Address Line 2"],
