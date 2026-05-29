@@ -534,12 +534,11 @@ const updatePlusOne = async (guest, bringingPlusOne, plusOneName = "") => {
             ))}
             <button
               onClick={() => {
-                if (isAdminUnlocked) {
-                  setActiveTab("Admin");
-                } else {
-                  setShowAdminLogin(true);
-                }
-              }}
+  setActiveTab("Admin");
+  if (!isAdminUnlocked) {
+    setShowAdminLogin(true);
+  }
+}}
               style={{
                 ...styles.navButton,
                 background: activeTab === "Admin" ? "#4f7c95" : "transparent",
@@ -948,7 +947,7 @@ Current Response: {guest.status}
           </section>
         )}
 
-        {showAdminLogin && (
+        {activeTab === "Admin" && showAdminLogin && !isAdminUnlocked && (
           <section>
             <div style={{ ...styles.card, maxWidth: 520, margin: "0 auto", display: "grid", gap: 16, textAlign: "center" }}>
               <h2 style={{ margin: 0, fontSize: 34, color: "#4f7c95" }}>Admin Access</h2>
